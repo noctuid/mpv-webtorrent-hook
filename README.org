@@ -1,0 +1,28 @@
+* About
+This plugin allows mpv to stream magnet links (and any other torrent identifier [[https://github.com/webtorrent/webtorrent-cli][webtorrent-cli]] handles) directly. It will automatically remove videos after they are finished playing (by default) and will set the title to be the name of the video.
+
+This script will detect =magnet:= links and torrent files/urls ending in =.torrent= passed to mpv by default. For any other torrent identifier supported by webtorrent, prefix the identifier with =webtorrent://=.
+
+One reason you might want to use this script over calling ~webtorrent --mpv~ is that you can start mpv with a playlist of multiple magnet links or add magnet links to the playlist of an already open mpv window (e.g. using one of the scripts that allow appending a link from the clipboard to the playlist).
+
+By using this script, you can also see mpv output (which is hidden when calling ~webtorrent~ directly). On the other hand, you won't see the normal ~webtorrent~ output using this script.
+
+* Requirements
+- [[https://github.com/webtorrent/webtorrent-cli][webtorrent-cli]]
+- on linux (or maybe similar)
+- basic shell utilities (awk and tail)
+
+* Advantages Over Peerflix
+Peerflix is unmaintained, and webtorrent is supposedly significantly faster.
+
+Peerflix's output is not parseable, so the peerflix version of this script had to do a bunch of extra work with ~lsof~ to figure out the location of video files, the title of video files, and the process id of peerflix (in order to kill it). This script is a lot cleaner by comparison (though it could be better if webtorrent had a way to give [[https://github.com/webtorrent/webtorrent-cli/issues/132][more script-friendly output]]).
+
+* Limitations
+Currently torrents that have multiple media files will not work correctly. Changes to webtorrent-cli are necessary to make this easily possible.
+
+* Configuration
+In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the following settings:
+- =close_webtorrent= - whether to close webtorrent after unloading the video; if =no=, keep seeding (default: =yes=)
+- =remove_files= - whether to remove the video file from disk after unloading; =yes= only has an effect if =close_webtorrent= is also =yes= (default: =yes=)
+- =download_directory= - directory to download videos to (default: =/tmp/webtorrent=)
+- =webtorrent_flags= - string of extra flags to pass to webtorrent (default: ""; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)

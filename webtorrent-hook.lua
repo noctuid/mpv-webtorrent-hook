@@ -8,7 +8,8 @@ local settings = {
    close_webtorrent = true,
    remove_files = true,
    download_directory = "/tmp/webtorrent",
-   webtorrent_flags = ""
+   webtorrent_flags = "",
+   verbosity = "startup"
 }
 
 (require "mp.options").read_options(settings, "webtorrent-hook")
@@ -51,7 +52,6 @@ function play_torrent()
          url = url:sub(12)
       end
 
-      mp.msg.info("Starting webtorrent")
       -- don't reuse files (useful if ever support queuing)
       counter = counter + 1
       local output_file = settings.download_directory
@@ -74,7 +74,9 @@ function play_torrent()
          .. "{gsub(/(Seeding|Downloading): /, \"\"); print; exit}' "
          .. output_file
       local title = os.capture(title_command, true)
-      mp.msg.info("Setting media title to: " .. title)
+      if settings.verbosity == "verbose" then
+         mp.msg.info("Setting media title to: " .. title)
+      end
       mp.set_property("force-media-title", title)
 
       local path = settings.download_directory .. "/" .. title
@@ -87,10 +89,14 @@ end
 function webtorrent_cleanup()
    if settings.close_webtorrent then
       local url = mp.get_property("stream-open-filename")
-      mp.msg.info("Closing webtorrent for " .. open_videos[url].title)
+      if settings.verbosity == "verbose" then
+         mp.msg.info("Closing webtorrent for " .. open_videos[url].title)
+      end
       os.execute("kill " .. open_videos[url].pid)
       if settings.remove_files then
-         mp.msg.info("Removing media file for " .. open_videos[url].title)
+         if settings.verbosity == "verbose" then
+            mp.msg.info("Removing media file for " .. open_videos[url].title)
+         end
          os.execute("rm -r '" .. open_videos[url].path .. "'")
       end
       open_videos[url] = {}

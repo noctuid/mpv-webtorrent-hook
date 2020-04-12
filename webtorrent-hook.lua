@@ -91,7 +91,7 @@ function webtorrent_cleanup()
       os.execute("kill " .. open_videos[url].pid)
       if settings.remove_files then
          mp.msg.info("Removing media file for " .. open_videos[url].title)
-         os.execute("rm '" .. open_videos[url].path .. "'")
+         os.execute("rm -r '" .. open_videos[url].path .. "'")
       end
       open_videos[url] = {}
    end

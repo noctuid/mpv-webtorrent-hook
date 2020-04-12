@@ -26,4 +26,3 @@ In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the followin
 - =remove_files= - whether to remove the video file from disk after unloading; =yes= only has an effect if =close_webtorrent= is also =yes= (default: =yes=)
 - =download_directory= - directory to download videos to (default: =/tmp/webtorrent=)
 - =webtorrent_flags= - string of extra flags to pass to webtorrent (default: ""; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
-- =verbosity= - if =startup=, only print messages related to waiting for the webtorrent server to start; if =verbose=, print extra information about setting the media title, removing files, etc. (default: =startup=)

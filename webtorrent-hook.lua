@@ -43,7 +43,7 @@ end
 function play_torrent()
    local url = mp.get_property("stream-open-filename")
    if (url:find("magnet:") == 1 or url:find("peerflix://") == 1
-       or url:find("webtorrent://") == 1 or ends_with(url, ".torrent")) then
+       or url:find("webtorrent://") == 1 or ends_with(url, "torrent")) then
       if url:find("webtorrent://") == 1 then
          url = url:sub(14)
       end

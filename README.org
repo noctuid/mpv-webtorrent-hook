@@ -1,7 +1,7 @@
 * About
 This plugin allows mpv to stream magnet links (and any other torrent identifier [[https://github.com/webtorrent/webtorrent-cli][webtorrent-cli]] handles) directly. It will automatically remove videos after they are finished playing (by default) and will set the title to be the name of the video.
 
-This script will detect =magnet:= links and torrent files/urls ending in =.torrent= passed to mpv by default. For any other torrent identifier supported by webtorrent, prefix the identifier with =webtorrent://=.
+This script will detect =magnet:= links and torrent files/urls ending in =torrent= passed to mpv by default. For any other torrent identifier supported by webtorrent, prefix the identifier with =webtorrent://=.
 
 One reason you might want to use this script over calling ~webtorrent --mpv~ is that you can start mpv with a playlist of multiple magnet links or add magnet links to the playlist of an already open mpv window (e.g. using one of the scripts that allow appending a link from the clipboard to the playlist).
 

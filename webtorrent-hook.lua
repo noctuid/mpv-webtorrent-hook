@@ -14,7 +14,6 @@ local settings = {
 
 (require "mp.options").read_options(settings, "webtorrent-hook")
 
-local counter = 0
 local open_videos = {}
 
 -- http://lua-users.org/wiki/StringRecipes
@@ -52,10 +51,9 @@ function play_torrent()
          url = url:sub(12)
       end
 
-      -- don't reuse files (useful if ever support queuing)
-      counter = counter + 1
+      -- don't reuse files (so multiple mpvs works)
       local output_file = settings.download_directory
-         .. "/webtorrent-output-" .. counter .. ".log"
+         .. "/webtorrent-output-" .. mp.get_time() .. ".log"
       -- --keep-seeding is to prevent webtorrent from quitting once the download
       -- is done
       local webtorrent_command = "webtorrent "

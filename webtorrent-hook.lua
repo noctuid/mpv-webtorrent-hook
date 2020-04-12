@@ -9,6 +9,7 @@ local settings = {
    remove_files = true,
    download_directory = "/tmp/webtorrent",
    webtorrent_flags = "",
+   webtorrent_verbosity = "speed"
 }
 
 (require "mp.options").read_options(settings, "webtorrent-hook")
@@ -39,6 +40,13 @@ function os.capture(cmd, decolorize, raw)
    return s
 end
 
+function read_file(file)
+   local fh = assert(io.open(file, "rb"))
+   local contents = fh:read("*all")
+   fh:close()
+   return contents
+end
+
 function play_torrent()
    local url = mp.get_property("stream-open-filename")
    if (url:find("magnet:") == 1 or url:find("peerflix://") == 1
@@ -60,8 +68,8 @@ function play_torrent()
          .. " --out '" .. settings.download_directory .. "' --keep-seeding '"
          .. url .. "' &> " .. output_file .. " & echo $!"
       local pid = os.capture(webtorrent_command)
-
       mp.msg.info("Waiting for webtorrent server")
+
       local url_command = "tail -f " .. output_file
          .. " | awk '/Server running at:/ {print $4; exit}'"
       local url = os.capture(url_command, true)
@@ -81,6 +89,21 @@ function play_torrent()
       open_videos[url] = {title=title,path=path,pid=pid}
 
       mp.set_property("stream-open-filename", url)
+
+      if settings.webtorrent_verbosity == "speed" then
+         local printer_pid
+         local printer_pid_file = settings.download_directory
+            .. "/webtorrent-printer-" .. mp.get_time() .. ".pid"
+         os.execute("tail -f " .. output_file
+                       .. " | awk '/Speed:/' ORS='\r' & echo -n $! > "
+                       .. printer_pid_file)
+         printer_pid = read_file(printer_pid_file)
+         mp.register_event("file-loaded",
+                           function()
+                              os.execute("kill " .. printer_pid)
+                           end
+         )
+      end
    end
 end
 

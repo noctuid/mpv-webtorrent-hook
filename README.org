@@ -5,7 +5,7 @@ This script will detect =magnet:= links and torrent files/urls ending in =torren
 
 One reason you might want to use this script over calling ~webtorrent --mpv~ is that you can start mpv with a playlist of multiple magnet links or add magnet links to the playlist of an already open mpv window (e.g. using one of the scripts that allow appending a link from the clipboard to the playlist).
 
-By using this script, you can also see mpv output (which is hidden when calling ~webtorrent~ directly). On the other hand, you won't see the normal ~webtorrent~ output using this script.
+By using this script, you can also see mpv output (which is hidden when calling ~webtorrent~ directly). On the other hand, you won't be able to see both the normal ~webtorrent~ output and mpv's output at the same time. By default, this script will print the download speed while waiting for the video to load (see the information on the =webtorrent_verbosity= setting below for more options).
 
 * Requirements
 - [[https://github.com/webtorrent/webtorrent-cli][webtorrent-cli]]
@@ -26,3 +26,4 @@ In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the followin
 - =remove_files= - whether to remove the video file from disk after unloading; =yes= only has an effect if =close_webtorrent= is also =yes= (default: =yes=)
 - =download_directory= - directory to download videos to (default: =/tmp/webtorrent=)
 - =webtorrent_flags= - string of extra flags to pass to webtorrent (default: ""; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
+- =webtorrent_verbosity= - verbosity level of webtorrent output; output is stopped once the video is loaded to prevent clobbering mpv's output; output webtorrent's download speed line if =speed=; output nothing if =quiet= (default: =speed=)

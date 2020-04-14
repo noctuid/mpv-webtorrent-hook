@@ -108,8 +108,8 @@ function play_torrent()
 end
 
 function webtorrent_cleanup()
-   if settings.close_webtorrent then
-      local url = mp.get_property("stream-open-filename")
+   local url = mp.get_property("stream-open-filename")
+   if settings.close_webtorrent and open_videos[url] then
       local title = open_videos[url].title
       local path = open_videos[url].path
       local pid = open_videos[url].pid

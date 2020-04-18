@@ -58,6 +58,7 @@ function play_torrent()
          url = url:sub(12)
       end
 
+      os.execute("mkdir -p " .. settings.download_directory)
       -- don't reuse files (so multiple mpvs works)
       local output_file = settings.download_directory
          .. "/webtorrent-output-" .. mp.get_time() .. ".log"

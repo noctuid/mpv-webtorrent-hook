@@ -73,7 +73,7 @@ function play_torrent()
       mp.msg.info("Waiting for webtorrent server")
 
       local url_command = "tail -f " .. output_file
-         .. " | awk '/Server running at:/ {print $4; exit}'"
+         .. " | awk '/Server running at:/ {print $3; exit}' | sed 's#^at:##'"
       local url = os.capture(url_command, true)
       mp.msg.info("Webtorrent server is up")
 
@@ -90,7 +90,7 @@ function play_torrent()
       end
       open_videos[url] = {title=title,path=path,pid=pid}
 
-      mp.set_property("stream-open-filename", path)
+      mp.set_property("stream-open-filename", url)
 
       if settings.webtorrent_verbosity == "speed" then
          local printer_pid

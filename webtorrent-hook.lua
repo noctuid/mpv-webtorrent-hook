@@ -64,10 +64,11 @@ function play_torrent()
          .. "/webtorrent-output-" .. mp.get_time() .. ".log"
       -- --keep-seeding is to prevent webtorrent from quitting once the download
       -- is done
-      local webtorrent_command = "webtorrent "
+      local webtorrent_command = "webtorrent download '"
+         .. url .. "' "
          .. settings.webtorrent_flags
-         .. " --out '" .. settings.download_directory .. "' --keep-seeding '"
-         .. url .. "' &> " .. output_file .. " & echo $!"
+         .. " --out '" .. settings.download_directory .. "' --keep-seeding &> " 
+         .. output_file .. " & echo $!"
       local pid = os.capture(webtorrent_command)
       mp.msg.info("Waiting for webtorrent server")
 
@@ -89,7 +90,7 @@ function play_torrent()
       end
       open_videos[url] = {title=title,path=path,pid=pid}
 
-      mp.set_property("stream-open-filename", url)
+      mp.set_property("stream-open-filename", path)
 
       if settings.webtorrent_verbosity == "speed" then
          local printer_pid

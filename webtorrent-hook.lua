@@ -14,6 +14,8 @@ local settings = {
 
 (require "mp.options").read_options(settings, "webtorrent-hook")
 
+local utils = require "mp.utils";
+
 local open_videos = {}
 
 -- http://lua-users.org/wiki/StringRecipes
@@ -58,22 +60,25 @@ function play_torrent()
          url = url:sub(12)
       end
 
-      os.execute("mkdir -p " .. settings.download_directory)
+      local download_dir = mp.command_native({"expand-path",
+                                              settings.download_directory})
+      mp.commandv("run", "mkdir", "-p", download_dir)
       -- don't reuse files (so multiple mpvs works)
-      local output_file = settings.download_directory
-         .. "/webtorrent-output-" .. mp.get_time() .. ".log"
+      local output_file =
+         utils.join_path(download_dir,
+                         "webtorrent-output-" .. mp.get_time() .. ".log")
       -- --keep-seeding is to prevent webtorrent from quitting once the download
       -- is done
       local webtorrent_command = "webtorrent download '"
          .. url .. "' "
          .. settings.webtorrent_flags
-         .. " --out '" .. settings.download_directory .. "' --keep-seeding &> " 
-         .. output_file .. " & echo $!"
+         .. " --out '" .. download_dir .. "' --keep-seeding &> '"
+         .. output_file .. "' & echo $!"
       local pid = os.capture(webtorrent_command)
       mp.msg.info("Waiting for webtorrent server")
 
-      local url_command = "tail -f " .. output_file
-         .. " | awk '/Server running at:/ {print $3; exit}' | sed 's#^at:##'"
+      local url_command = "tail -f '" .. output_file
+         .. "' | awk '/Server running at:/ {gsub(/Server running at:/, \"\"); print $1; exit}'"
       local url = os.capture(url_command, true)
       mp.msg.info("Webtorrent server is up")
 
@@ -86,7 +91,7 @@ function play_torrent()
 
       local path
       if title then
-         path = settings.download_directory .. "/" .. title
+         path = utils.join_path(download_dir, title)
       end
       open_videos[url] = {title=title,path=path,pid=pid}
 
@@ -94,10 +99,11 @@ function play_torrent()
 
       if settings.webtorrent_verbosity == "speed" then
          local printer_pid
-         local printer_pid_file = settings.download_directory
-            .. "/webtorrent-printer-" .. mp.get_time() .. ".pid"
-         os.execute("tail -f " .. output_file
-                       .. " | awk '/Speed:/' ORS='\r' & echo -n $! > "
+         local printer_pid_file =
+            utils.join_path(download_dir,
+                            "webtorrent-printer-" .. mp.get_time() .. ".pid")
+         os.execute("tail -f '" .. output_file
+                       .. "' | awk '/Speed:/' ORS='\r' & echo -n $! > "
                        .. printer_pid_file)
          printer_pid = read_file(printer_pid_file)
          mp.register_event("file-loaded",
@@ -121,11 +127,9 @@ function webtorrent_cleanup()
          os.execute("kill " .. pid)
       end
 
-      if settings.remove_files then
-         if path then
-            mp.msg.verbose("Removing media file for " .. title)
-            os.execute("rm -r '" .. path .. "'")
-         end
+      if settings.remove_files and path then
+         mp.msg.verbose("Removing media file for " .. title)
+         mp.commandv("run", "rm", "-r", path)
       end
 
       open_videos[url] = {}

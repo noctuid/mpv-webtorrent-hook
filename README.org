@@ -17,13 +17,17 @@ Peerflix is unmaintained, and webtorrent is supposedly significantly faster.
 
 Peerflix's output is not parseable, so the peerflix version of this script had to do a bunch of extra work with ~lsof~ to figure out the location of video files, the title of video files, and the process id of peerflix (in order to kill it). This script is a lot cleaner by comparison (though it could be better if webtorrent had a way to give [[https://github.com/webtorrent/webtorrent-cli/issues/132][more script-friendly output]]).
 
-* Limitations
-Currently torrents that have multiple media files will not work correctly. Changes to webtorrent-cli are necessary to make this easily possible.
+* Disadvantages and Limitations
+Webtorrent has parseable output but is still not very script friendly. [[mpv-btfs-stream][https://github.com/noctuid/mpv-btfs-stream]] is cleaner and simpler by comparison and does not rely on parsing output. The advantage of webtorrent over btfs is that webtorrent is much faster. See [[here][https://github.com/noctuid/mpv-btfs-hook#comparison-with-mpv-webtorrent-hook]] for a full comparison.
+
+Currently torrents that have multiple media files will not work correctly. Changes to webtorrent-cli are necessary to make this easily possible. If you need this functionality, you can use [[mpv-btfs-hook][https://github.com/noctuid/mpv-btfs-stream]] just for torrents that contain multiple videos or images.
+
+See also [[https://github.com/mrxdst/webtorrent-mpv-hook][webtorrent-mpv-hook]] which directly uses the webtorrent library instead of webtorrent-cli. I am going to look at this plugin and will probably recommend using it in the future.
 
 * Configuration
 In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the following settings:
 - =close_webtorrent= - whether to close webtorrent after unloading the video; if =no=, keep seeding (default: =yes=)
 - =remove_files= - whether to remove the video file from disk after unloading; =yes= only has an effect if =close_webtorrent= is also =yes= (default: =yes=)
-- =download_directory= - directory to download videos to (default: =/tmp/webtorrent=)
+- =download_directory= - directory to download videos to; the script will run mpv's =expand-path= command on the string first so that mpv path abreviations such as =~/= and =~~/= can be used (default: =/tmp/webtorrent=)
 - =webtorrent_flags= - string of extra flags to pass to webtorrent (default: ""; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
 - =webtorrent_verbosity= - verbosity level of webtorrent output; output is stopped once the video is loaded to prevent clobbering mpv's output; output webtorrent's download speed line if =speed=; output nothing if =quiet= (default: =speed=)

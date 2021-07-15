@@ -22,7 +22,14 @@ Webtorrent has parseable output but is still not very script friendly. [[https:/
 
 Currently torrents that have multiple media files will not work correctly. Changes to webtorrent-cli are necessary to make this easily possible. If you need this functionality, you can use [[https://github.com/noctuid/mpv-btfs-stream][mpv-btfs-stream]] just for torrents that contain multiple videos or images.
 
-See also [[https://github.com/mrxdst/webtorrent-mpv-hook][webtorrent-mpv-hook]] which directly uses the webtorrent library instead of webtorrent-cli. I am going to look at this plugin and will probably recommend using it in the future.
+* Comparison with webtorrent-mpv-hook
+There is a similarly named plugin [[https://github.com/mrxdst/webtorrent-mpv-hook][webtorrent-mpv-hook]] which directly uses the webtorrent library instead of webtorrent-cli. It supports torrent containing multiple video files and has a much nicer progress display. This is much preferable, and I am hoping to deprecate this plugin in the future and recommend webtorrent-mpv-hook instead.
+
+Here are the features it is currently missing that this plugin or btfs-stream have:
+- [ ] no option to delete files after exiting mpv
+- [ ] does not work correctly with scripts that allow pasting a path/url into the playlist
+- [ ] does not support =~/= and other mpv path abbreviations in the path setting for where to download to
+- [ ] does not support displaying torrents of images (maybe just torrents with a zip of images)
 
 * Configuration
 In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the following settings:

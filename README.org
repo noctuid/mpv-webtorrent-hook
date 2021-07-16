@@ -1,40 +1,74 @@
 * About
 This plugin allows mpv to stream magnet links (and any other torrent identifier [[https://github.com/webtorrent/webtorrent-cli][webtorrent-cli]] handles) directly. It will automatically remove videos after they are finished playing (by default) and will set the title to be the name of the video.
 
-This script will detect =magnet:= links and torrent files/urls ending in =torrent= passed to mpv by default. For any other torrent identifier supported by webtorrent, prefix the identifier with =webtorrent://=.
+This script will detect =magnet:= links, torrent files/urls ending in =torrent=, and info hashes. You can also explicitly prefix the identifier with =webtorrent://= to let this plugin know the path/url is a torrent (e.g. you could do this to play a torrent file that didn't end in =torrent=)
 
-One reason you might want to use this script over calling ~webtorrent --mpv~ is that you can start mpv with a playlist of multiple magnet links or add magnet links to the playlist of an already open mpv window (e.g. using one of the scripts that allow appending a link from the clipboard to the playlist).
+* Comparison with using ~webtorrent --mpv~
+One benefit is consistency of syntax (e.g. if you have a shell command or keybinding to call ~mpv <clipboard>~, you don't need to handle torrents differently).
+
+This script also provides more functionality and options. For example, it can automatically delete downloaded files, and it can remember and jump to the last video you played in a torrent file with multiple videos. See the settings heading below for more information.
+
+Another reason you might want to use this script is that you can start mpv with a playlist of multiple magnet links or add magnet links to the playlist of an already open mpv window (e.g. using one of the scripts that allow appending a link from the clipboard to the playlist such as [[https://github.com/Eisa01/mpv-scripts#smartcopypaste-ii-script][SmartCopyPaste-II]]).
 
 By using this script, you can also see mpv output (which is hidden when calling ~webtorrent~ directly). On the other hand, you won't be able to see both the normal ~webtorrent~ output and mpv's output at the same time. By default, this script will print the download speed while waiting for the video to load (see the information on the =webtorrent_verbosity= setting below for more options).
 
 * Requirements
 - [[https://github.com/webtorrent/webtorrent-cli][webtorrent-cli]]
 - on linux (or maybe similar)
-- basic shell utilities (awk and tail)
+- basic shell utilities (bash, awk, grep, nohup, tail)
+- [[https://github.com/stedolan/jq][jq]]
+- [[https://github.com/benibela/xidel][xidel]]
 
-* Advantages Over Peerflix
+Webtorrent-cli does not currently provide a way to get a json list of files which is why jq and xidel are required.
+
+* Installation Instructions
+Clone this repo into the mpv scripts directory (e.g. =git clone <url> ~/.config/mpv/scripts/webtorrent-hook=). You must put this whole directory in the scripts directory not just the lua file.
+
+* Comparison with Peerflix-hook
 Peerflix is unmaintained, and webtorrent is supposedly significantly faster.
 
 Peerflix's output is not parseable, so the peerflix version of this script had to do a bunch of extra work with ~lsof~ to figure out the location of video files, the title of video files, and the process id of peerflix (in order to kill it). This script is a lot cleaner by comparison (though it could be better if webtorrent had a way to give [[https://github.com/webtorrent/webtorrent-cli/issues/132][more script-friendly output]]).
 
-* Disadvantages and Limitations
-Webtorrent has parseable output but is still not very script friendly. [[https://github.com/noctuid/mpv-btfs-stream][mpv-btfs-stream]] is cleaner and simpler by comparison and does not rely on parsing output. The advantage of webtorrent over btfs is that webtorrent is much faster. See [[https://github.com/noctuid/mpv-btfs-hook#comparison-with-mpv-webtorrent-hook][here]] for a full comparison.
+This script also has a lot more functionality than the peerflix version (e.g support for torrents containing multiple media files).
 
-Currently torrents that have multiple media files will not work correctly. Changes to webtorrent-cli are necessary to make this easily possible. If you need this functionality, you can use [[https://github.com/noctuid/mpv-btfs-stream][mpv-btfs-stream]] just for torrents that contain multiple videos or images.
+* Comparison With Btfs-stream
+Webtorrent has parseable output but is still not very script friendly. [[https://github.com/noctuid/mpv-btfs-stream][mpv-btfs-stream]] is cleaner and simpler by comparison and does not rely on parsing output. The advantage of webtorrent over btfs is that webtorrent is much faster. Functionally, I am not aware of any downsides of using webtorrent-hook instead of btfs-stream though. See [[https://github.com/noctuid/mpv-btfs-hook#comparison-with-mpv-webtorrent-hook][here]] for a full comparison.
 
 * Comparison with webtorrent-mpv-hook
-There is a similarly named plugin [[https://github.com/mrxdst/webtorrent-mpv-hook][webtorrent-mpv-hook]] which directly uses the webtorrent library instead of webtorrent-cli. It supports torrent containing multiple video files and has a much nicer progress display. This is much preferable, and I am hoping to deprecate this plugin in the future and recommend webtorrent-mpv-hook instead.
+There is a similarly named plugin [[https://github.com/mrxdst/webtorrent-mpv-hook][webtorrent-mpv-hook]] which directly uses the webtorrent library instead of webtorrent-cli.
 
-Here are the features it is currently missing that this plugin or btfs-stream have:
-- [ ] no option to delete files after exiting mpv
-- [ ] does not work correctly with scripts that allow pasting a path/url into the playlist
-- [ ] does not support =~/= and other mpv path abbreviations in the path setting for where to download to
-- [ ] does not support displaying torrents of images (maybe just torrents with a zip of images)
+Here are advantages of the other plugin:
+- it directly uses the webtorrent library, which simplifies how the code works somewhat
+- it has a much prettier speed/progress display while you are waiting for the torrent to start
+
+Here are missing features of the other plugin:
+- it has no option to delete files after exiting mpv
+- it has no option to continue seeding after exiting mpv
+- it does not remember the last file played for previously played torrents (it will always start at the first file)
+- it does not work correctly with scripts that allow pasting a path/url into the playlist (it only supports one webtorrent instance; this plugin supports an arbitrary number of webtorrent-cli instances)
 
 * Configuration
 In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the following settings:
 - =close_webtorrent= - whether to close webtorrent after unloading the video; if =no=, keep seeding (default: =yes=)
 - =remove_files= - whether to remove the video file from disk after unloading; =yes= only has an effect if =close_webtorrent= is also =yes= (default: =yes=)
-- =download_directory= - directory to download videos to; the script will run mpv's =expand-path= command on the string first so that mpv path abreviations such as =~/= and =~~/= can be used (default: =/tmp/webtorrent=)
-- =webtorrent_flags= - string of extra flags to pass to webtorrent (default: ""; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
-- =webtorrent_verbosity= - verbosity level of webtorrent output; output is stopped once the video is loaded to prevent clobbering mpv's output; output webtorrent's download speed line if =speed=; output nothing if =quiet= (default: =speed=)
+- =download_directory= - directory to download videos to; the script will run mpv's =expand-path= command on the string first so that mpv path abbreviations such as =~/= and =~~/= can be used (default: =/tmp/webtorrent-hook=)
+- =webtorrent_flags= - json array of extra flags to pass to webtorrent (default: []; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
+- =show_speed= - whether to continuously output webtorrent-cli's download speed line; the output stops once the video is loaded to prevent clobbering mpv's output (default: =yes=)
+- =remember_last_played= - whether to store the last played video in a title and start at it in the future (default: =yes=)
+- =remember_directory= - directory to store last played information in; make this something outside of =/tmp= if you want it to be remembered after computer reboot (default: =/tmp/webtorrent-hook-last-played=)
+
+If you set =close_webtorrent= to =no=, you will have to manually kill the =WebTorrent= processes yourself when you want to stop seeding (~pgrep WebTorrent~ should show all processes).
+
+Here is an example configuration file:
+#+begin_src conf-unix
+close_webtorrent=yes
+remove_files=yes
+# change download directory
+download_directory=~/tmp/webtorrent-hook
+# do not use --out, --keep-streaming, --port or most other flags (should be
+# obvious; don't use --quiet, --mpv, etc.)
+webtorrent_flags=["--blocklist", "<blocklist url>"]
+show_speed=no
+remember_last_played=true
+remember_directory=~/tmp/webtorrent-remember
+#+end_src

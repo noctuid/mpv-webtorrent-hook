@@ -1,5 +1,6 @@
 -- TODO start webtorrent instance immediately when pasting into playlist instead
 -- of waiting for load?
+-- TODO what happens with --prefetch-playlist?
 
 local settings = {
    close_webtorrent = true,
@@ -49,6 +50,18 @@ function is_handled_url(url, load_failed)
    end
 end
 
+function load_file_after_current(url, option_table, num_entries)
+   mp.command_native({
+         "loadfile", url, "append", option_table
+   })
+   local index = mp.get_property("playlist-pos")
+   mp.command_native({
+         "playlist-move",
+         mp.get_property("playlist-count") - 1,
+         index + 1 + num_entries
+   })
+end
+
 -- * Store Last Played Files
 function file_info_hash(filename)
    return webtorrent_files[filename]
@@ -87,6 +100,10 @@ function load_webtorrent_files(info_hash, webtorrent_info)
    if settings.remember_last_played then
       last_played_filename = get_last_played_filename_for_torrent(info_hash)
    end
+   local should_remember = settings.remember_last_played
+      and last_played_filename
+   local file_index = 0
+   local file_play_index = 0
    for _, file in pairs(webtorrent_info["files"]) do
       local title = file["title"]
       webtorrent_files[title] = info_hash
@@ -97,21 +114,20 @@ function load_webtorrent_files(info_hash, webtorrent_info)
       option_table["force-media-title"] = title
       local url = file["url"]
       if first then
-         mp.command_native({
-               "loadfile", url, "replace", option_table
-         })
+         load_file_after_current(url, option_table, 0)
+         mp.command_native({"playlist-remove", mp.get_property("playlist-pos")})
       else
-         mp.command_native({
-               "loadfile", url, "append", option_table
-         })
-         if (settings.remember_last_played and
-             last_played_filename ~= "" and not found_last_played) then
-            mp.commandv("playlist-next")
+         load_file_after_current(url, option_table,
+                                 file_index - (file_play_index + 1))
+         if should_remember and not found_last_played then
+            file_play_index = file_play_index + 1
+            mp.set_property("playlist-pos", mp.get_property("playlist-pos") + 1)
             if title == last_played_filename then
                found_last_played = true
             end
          end
       end
+      file_index = file_index + 1
       first = false
    end
 end
@@ -161,6 +177,7 @@ function start_webtorrent(url, torrent_info)
       mp.msg.info("Webtorrent server is up")
       local webtorrent_info = utils.parse_json(webtorrent_result.stdout)
       local pid = webtorrent_info["pid"]
+      mp.msg.debug(webtorrent_info)
       local name = "Unknown name"
       if torrent_info["name"] ~= nil then
          name = torrent_info["name"]

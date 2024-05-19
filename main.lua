@@ -52,7 +52,7 @@ end
 
 function load_file_after_current(url, option_table, num_entries)
    mp.command_native({
-         "loadfile", url, "append", option_table
+         "loadfile", url, "append", -1, option_table
    })
    local index = mp.get_property("playlist-pos")
    mp.command_native({

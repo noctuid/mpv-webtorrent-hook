@@ -69,6 +69,6 @@ download_directory=~/tmp/webtorrent-hook
 # obvious; don't use --quiet, --mpv, etc.)
 webtorrent_flags=["--blocklist", "<blocklist url>"]
 show_speed=no
-remember_last_played=true
+remember_last_played=yes
 remember_directory=~/tmp/webtorrent-remember
 #+end_src

@@ -52,7 +52,7 @@ In =~/.config/mpv/script-opts/webtorrent-hook.conf=, you can change the followin
 - =close_webtorrent= - whether to close webtorrent after unloading the video; if =no=, keep seeding (default: =yes=)
 - =remove_files= - whether to remove the video file from disk after unloading; =yes= only has an effect if =close_webtorrent= is also =yes= (default: =yes=)
 - =download_directory= - directory to download videos to; the script will run mpv's =expand-path= command on the string first so that mpv path abbreviations such as =~/= and =~~/= can be used (default: =/tmp/webtorrent-hook=)
-- =webtorrent_flags= - json array of extra flags to pass to webtorrent (default: []; flags always used: =webtorrent --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
+- =webtorrent_flags= - json array of extra flags to pass to webtorrent (default: []; flags always used: =webtorrent --port 0 --out <download_directory> --keep-streaming=; keep-streaming is always passed, and =close_webtorrent= determines whether or not to stop webtorrent)
 - =show_speed= - whether to continuously output webtorrent-cli's download speed line; the output stops once the video is loaded to prevent clobbering mpv's output (default: =yes=)
 - =remember_last_played= - whether to store the last played video in a title and start at it in the future (default: =yes=)
 - =remember_directory= - directory to store last played information in; make this something outside of =/tmp= if you want it to be remembered after computer reboot (default: =/tmp/webtorrent-hook-last-played=)

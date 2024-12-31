@@ -6,7 +6,7 @@ mkdir -p "$out_dir"
 # using file over pipe so multiple processes can read from it and because >(tee
 # "$pipe" "$second-pipe-or file") ends up blocking mpv
 webtorrent_output_file="$out_dir"/webtorrent-output
-nohup webtorrent download "$@" --out "$out_dir" --keep-seeding \
+nohup webtorrent download "$@" --port 0 --out "$out_dir" --keep-seeding \
 	&> "$webtorrent_output_file" &
 pid=$!
 

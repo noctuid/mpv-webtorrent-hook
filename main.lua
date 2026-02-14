@@ -41,7 +41,7 @@ function write_file(file, text)
    fh:close()
 end
 
--- finds `magnet:` anywhere in the string and returns everything from that point onward
+-- finds one of the protocols handled anywhere in the string and returns everything from that point onward
 function extract_url(url)
    for _, protocol in ipairs(handled_protocols) do
       local start = url:find(protocol, 1, true)

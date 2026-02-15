@@ -20,7 +20,6 @@ local webtorrent_instances = {}
 local webtorrent_files = {}
 local script_dir = mp.get_script_directory()
 local printer_pid = nil
-local handled_protocols = {"magnet:", "peerflix://", "webtorrent://"}
 
 -- * Helpers
 -- http://lua-users.org/wiki/StringRecipes
@@ -41,13 +40,11 @@ function write_file(file, text)
    fh:close()
 end
 
--- finds one of the protocols handled anywhere in the string and returns everything from that point onward
+-- finds magnet: anywhere in the string and returns everything from that point onward
 function extract_url(url)
-   for _, protocol in ipairs(handled_protocols) do
-      local start = url:find(protocol, 1, true)
-      if start and start > 1 then
-         return url:sub(start)
-      end
+   local start = url:find("magnet:", 1, true)
+   if start and start > 1 then
+      return url:sub(start)
    end
    return url
 end

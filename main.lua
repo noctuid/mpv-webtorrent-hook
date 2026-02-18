@@ -50,7 +50,6 @@ function extract_url(url)
 end
 
 function is_handled_url(url, load_failed)
-   url = extract_url(url)
    if load_failed then
       -- info hash
       return (load_failed and string.match(url, "%w+"))

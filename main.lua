@@ -40,13 +40,24 @@ function write_file(file, text)
    fh:close()
 end
 
+-- finds magnet: anywhere in the string and returns everything from that point onward
+function extract_url(url)
+   local start = url:find("magnet:", 1, true)
+   if start and start > 1 then
+      return url:sub(start)
+   end
+   return url
+end
+
 function is_handled_url(url, load_failed)
    if load_failed then
       -- info hash
       return (load_failed and string.match(url, "%w+"))
    else
-      return (url:find("magnet:") == 1 or url:find("peerflix://") == 1
-                 or url:find("webtorrent://") == 1 or ends_with(url, "torrent"))
+      return (url:find("magnet:") == 1
+                 or url:find("peerflix://") == 1
+                 or url:find("webtorrent://") == 1
+                 or ends_with(url, "torrent"))
    end
 end
 
@@ -198,6 +209,7 @@ end
 -- check if the url is a torrent and play it if it is
 function maybe_play_torrent(load_failed)
    local url = mp.get_property("stream-open-filename")
+   url = extract_url(url)
    if is_handled_url(url, load_failed) then
       if url:find("webtorrent://") == 1 then
          url = url:sub(14)
